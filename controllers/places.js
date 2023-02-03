@@ -1,4 +1,4 @@
-import Amrtago from "../models/Place.js";
+import Place from "../models/Place.js";
 import dotenv from "dotenv";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import sharp from "sharp";
@@ -10,7 +10,7 @@ import { s3Client } from "../s3.js";
 export const getPlace = async (req, res) => {
   try {
     const { id } = req.params;
-    const place = await Amrtago.findById(id);
+    const place = await Place.findById(id);
 
     res.status(200).json(place);
   } catch (error) {
@@ -21,7 +21,7 @@ export const getPlace = async (req, res) => {
 export const getHotel = async (req, res) => {
   try {
     const { place } = req.params;
-    const data = await Amrtago.find({ placeType: place });
+    const data = await Place.find({ placeType: place });
     res.json(data);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -31,7 +31,7 @@ export const getHotel = async (req, res) => {
 export const getPlaceByLimit = async (req, res) => {
   try {
     const { place, limit } = req.params;
-    const data = await Amrtago.find({ placeType: place }).limit(limit);
+    const data = await Place.find({ placeType: place }).limit(limit);
     res.json(data);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -40,7 +40,7 @@ export const getPlaceByLimit = async (req, res) => {
 
 export const getAllPlaces = async (req, res) => {
   try {
-    const places = await Amrtago.find({});
+    const places = await Place.find({});
     res.status(200).json(places);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -50,7 +50,7 @@ export const getAllPlaces = async (req, res) => {
 export const getAllPlacesByLimit = async (req, res) => {
   try {
     const { limit } = req.params;
-    const places = await Amrtago.find({}).limit(limit);
+    const places = await Place.find({}).limit(limit);
     res.status(200).json(places);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -62,7 +62,7 @@ export const getNearPlaces = async (req, res) => {
   try {
     const { longitude, latitude } = req.params;
 
-    const places = await Amrtago.find({
+    const places = await Place.find({
       geolocation: {
         $near: {
           $maxDistance: 5000,
@@ -88,7 +88,7 @@ export const getNearPlacesByType = async (req, res) => {
     const { longitude, latitude, place } = req.params;
     console.log(longitude, latitude, place);
 
-    const places = await Amrtago.find({
+    const places = await Place.find({
       geolocation: {
         $near: {
           $maxDistance: 5000,
@@ -225,7 +225,7 @@ export const addPlace = async (req, res) => {
       );
     }
 
-    var newPlace = new Amrtago({
+    var newPlace = new Place({
       _id,
       placeType,
       placeId,
@@ -274,7 +274,7 @@ export const updatePlace = async (req, res) => {
 
 export const deletePlace = async (req, res) => {
   try {
-    const deletedPlace = await Amrtago.findByIdAndDelete(req.params.id);
+    const deletedPlace = await Place.findByIdAndDelete(req.params.id);
     res.status(200).json(deletedPlace);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -329,7 +329,7 @@ export const updateSingleImage = async (req, res) => {
       );
     }
     req.body.singleimage = singleimage;
-    let updatedSingleImage = await Amrtago.findByIdAndUpdate(
+    let updatedSingleImage = await Place.findByIdAndUpdate(
       req.params.id,
       req.body,
       // `"singleimage": ["${singleimage}"]`,

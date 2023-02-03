@@ -60,6 +60,6 @@ const PlaceSchema = new mongoose.Schema({
 PlaceSchema.index({ geolocation: "2dsphere" });
 PlaceSchema.index({ placeType: "text" });
 
-const Place = mongoose.model("Amrtago", PlaceSchema);
+const Place = mongoose.model("Place", PlaceSchema);
 
 export default Place;

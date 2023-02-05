@@ -14,7 +14,6 @@ import placeRoutes from "./routes/places.js";
 import nearRoutes from "./routes/nearRoutes.js";
 import { addPlace } from "./controllers/places.js";
 import { register } from "./controllers/auth.js";
-import { convertSingleImage } from "./middleware/singleimage.js";
 
 import { verifyToken } from "./middleware/auth.js";
 import { checkAdmin } from "./middleware/admin.js";
@@ -23,7 +22,8 @@ import { checkAdmin } from "./middleware/admin.js";
 import roomRoutes from "./routes/room.js";
 // booking
 import bookingRoutes from "./routes/booking.js";
-
+// image
+import imageRoutes from "./routes/image.js";
 // configurations
 
 const __filename = fileURLToPath(import.meta.url);
@@ -93,6 +93,8 @@ app.use("/booking", bookingRoutes);
 
 // for near place test
 app.use("/near", nearRoutes);
+
+app.use("/image", imageRoutes);
 
 // show first page
 app.get("*", function (_, res) {

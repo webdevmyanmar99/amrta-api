@@ -1,6 +1,8 @@
 import Image from "../models/Image.js";
 import dotenv from "dotenv";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import sharp from "sharp";
+import multer from "multer";
 
 import { fileTypeFromBuffer } from "file-type";
 dotenv.config();
@@ -11,37 +13,43 @@ export const addImage = async (req, res) => {
     var { image } = req.body;
 
     if (!image) {
-      return (image = "");
+      return (image = []);
     } else {
-      let imageBuffer = new Buffer.from(image, "base64");
+      await Promise.all(
+        image.map(async (i) => {
+          let imageBuffer = new Buffer.from(i, "base64");
 
-      let fileType = await fileTypeFromBuffer(imageBuffer);
+          let fileType = await fileTypeFromBuffer(imageBuffer);
 
-      let mimeType = fileType.mime;
-      let extType = fileType.ext;
+          let mimeType = fileType.mime;
+          console.log(mimeType);
+          let extType = fileType.ext;
 
-      let imageName = `${Date.now()}-single.${extType}`;
+          let imageName = `${Date.now()}-single.${extType}`;
 
-      const uploadParams = {
-        Bucket: "amrtago",
-        Body: imageBuffer,
-        Key: imageName,
-        ContentType: mimeType,
-        ContentEncoding: "base64",
-        ACL: "public-read",
-      };
+          const uploadParams = {
+            Bucket: "amrtago",
+            Body: imageBuffer,
+            Key: imageName,
+            ContentType: mimeType,
+            ContentEncoding: "base64",
+            ACL: "public-read",
+          };
 
-      const run = async () => {
-        try {
-          await s3Client.send(new PutObjectCommand(uploadParams));
-        } catch (error) {
-          console.log("error", error);
-        }
-      };
-      run();
-      image = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
-      console.log(image);
+          const run = async () => {
+            try {
+              await s3Client.send(new PutObjectCommand(uploadParams));
+            } catch (error) {
+              console.log("error", error);
+            }
+          };
+          run();
+          image = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
+          console.log(image);
+        })
+      );
     }
+
     var newImage = new Image({
       image: image,
     });
@@ -68,34 +76,38 @@ export const updateImage = async (req, res) => {
     if (!image) {
       return (image = "");
     } else {
-      let imageBuffer = new Buffer.from(image, "base64");
+      Promise.all(
+        image.map(async (i) => {
+          let imageBuffer = new Buffer.from(i, "base64");
 
-      let fileType = await fileTypeFromBuffer(imageBuffer);
+          let fileType = await fileTypeFromBuffer(imageBuffer);
 
-      let mimeType = fileType.mime;
-      let extType = fileType.ext;
+          let mimeType = fileType.mime;
+          let extType = fileType.ext;
 
-      let imageName = `${Date.now()}-single.${extType}`;
+          let imageName = `${Date.now()}-single.${extType}`;
 
-      const uploadParams = {
-        Bucket: "amrtago",
-        Body: imageBuffer,
-        Key: imageName,
-        ContentType: mimeType,
-        ContentEncoding: "base64",
-        ACL: "public-read",
-      };
+          const uploadParams = {
+            Bucket: "amrtago",
+            Body: imageBuffer,
+            Key: imageName,
+            ContentType: mimeType,
+            ContentEncoding: "base64",
+            ACL: "public-read",
+          };
 
-      const run = async () => {
-        try {
-          await s3Client.send(new PutObjectCommand(uploadParams));
-        } catch (error) {
-          console.log("error", error);
-        }
-      };
-      run();
-      image = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
-      console.log(image);
+          const run = async () => {
+            try {
+              await s3Client.send(new PutObjectCommand(uploadParams));
+            } catch (error) {
+              console.log("error", error);
+            }
+          };
+          run();
+          image = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
+          console.log(image);
+        })
+      );
     }
 
     req.body.image = image;

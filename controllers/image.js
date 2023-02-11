@@ -56,7 +56,9 @@ export const addImage = async (req, res) => {
     const saveImage = await newImage.save();
     res.status(201).json(saveImage);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to upload your image.", data: saveImage });
   }
 };
 

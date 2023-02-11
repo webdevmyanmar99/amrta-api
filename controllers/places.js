@@ -18,20 +18,42 @@ export const getPlace = async (req, res) => {
   }
 };
 
-export const getHotel = async (req, res) => {
+export const getPlaceBySearch = async (req, res) => {
+  let town = new RegExp(req.query.town, "i");
+
   try {
-    const { place } = req.params;
-    const data = await Place.find({ placeType: place });
-    res.json(data);
+    const places = await Place.find({
+      "localize.address[0]": {
+        $elemMatch: {
+          town: town,
+        },
+      },
+    });
+    console.log(places);
+    res.status(200).json(places);
+    console.log(places);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
 
-export const getPlaceByLimit = async (req, res) => {
+// export const getHotel = async (req, res) => {
+//   try {
+//     const { place } = req.params;
+//     const data = await Place.find({ placeType: place });
+//     res.json(data);
+//   } catch (error) {
+//     res.status(404).json({ message: error.message });
+//   }
+// };
+
+export const getPlaceByPage = async (req, res) => {
   try {
-    const { place, limit } = req.params;
-    const data = await Place.find({ placeType: place }).limit(limit);
+    const { place } = req.params;
+    const page = req.query.page;
+    const data = await Place.find({ placeType: place })
+      .skip(page * 20)
+      .limit(20);
     res.json(data);
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -39,23 +61,27 @@ export const getPlaceByLimit = async (req, res) => {
 };
 
 export const getAllPlaces = async (req, res) => {
+  const page = parseInt(req.query.page);
   try {
-    const places = await Place.find({});
+    const places = await Place.find({})
+      .skip(page * 20)
+      .limit(20);
+
     res.status(200).json(places);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
 
-export const getAllPlacesByLimit = async (req, res) => {
-  try {
-    const { limit } = req.params;
-    const places = await Place.find({}).limit(limit);
-    res.status(200).json(places);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
-  }
-};
+// export const getAllPlacesByLimit = async (req, res) => {
+//   try {
+//     const { limit } = req.params;
+//     const places = await Place.find({}).limit(limit);
+//     res.status(200).json(places);
+//   } catch (error) {
+//     res.status(404).json({ message: error.message });
+//   }
+// };
 // find places by near location
 
 export const getNearPlaces = async (req, res) => {
@@ -84,6 +110,7 @@ export const getNearPlaces = async (req, res) => {
 // get near places by type
 
 export const getNearPlacesByType = async (req, res) => {
+  const page = req.query.page;
   try {
     const { longitude, latitude, place } = req.params;
     console.log(longitude, latitude, place);
@@ -101,7 +128,9 @@ export const getNearPlacesByType = async (req, res) => {
       },
 
       placeType: place,
-    });
+    })
+      .skip(page * 20)
+      .limit(20);
 
     res.status(200).json(places);
   } catch (error) {

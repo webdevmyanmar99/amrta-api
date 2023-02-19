@@ -38,8 +38,14 @@ const PlaceSchema = new mongoose.Schema({
     },
   },
   price: [String],
-  favcount: String,
-  rating: String,
+  favcount: {
+    type: Number,
+    default: 0,
+  },
+  rating: {
+    type: Number,
+    default: 0,
+  },
   remark: String,
   website: String,
   email: String,

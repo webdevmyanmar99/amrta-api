@@ -1,11 +1,11 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 // register user
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
     // const { filename } = req.file;
     const salt = await bcrypt.genSalt();
     const passwordHash = await bcrypt.hash(password, salt);
@@ -15,6 +15,7 @@ export const register = async (req, res) => {
       email,
       password: passwordHash,
       // picturePath: filename,
+      role,
     });
     const savedUser = await newUser.save();
     res.status(201).json(savedUser);
@@ -28,10 +29,10 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email: email });
-    if (!user) return res.status(400).json({ message: 'User does not exist.' });
+    if (!user) return res.status(400).json({ message: "User does not exist." });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid Password.' });
+    if (!isMatch) return res.status(400).json({ message: "Invalid Password." });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     delete user.password;

@@ -18,34 +18,56 @@ export const getPlace = async (req, res) => {
   }
 };
 
-export const getPlaceBySearch = async (req, res) => {
-  let town = new RegExp(req.query.town, "i");
-
+export const getPlaceByTown = async (req, res) => {
   try {
-    const places = await Place.find({
-      "localize.address[0]": {
-        $elemMatch: {
-          town: town,
-        },
+    var { town } = req.params;
+
+    const places = await Place.find(
+      {
+        "localize.hashtag.enhashtag": { $regex: new RegExp(town, "i") },
       },
-    });
-    console.log(places);
-    res.status(200).json(places);
-    console.log(places);
+      { "localize.address.town": 1, _id: 0 }
+    );
+
+    const count = await Place.find({
+      "localize.hashtag.enhashtag": { $regex: new RegExp(town, "i") },
+    }).count();
+
+    res.status(200).json({ count: count, places });
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
 
-// export const getHotel = async (req, res) => {
-//   try {
-//     const { place } = req.params;
-//     const data = await Place.find({ placeType: place });
-//     res.json(data);
-//   } catch (error) {
-//     res.status(404).json({ message: error.message });
-//   }
-// };
+export const getPlaceByTownByplaceType = async (req, res) => {
+  try {
+    var { town, placetype } = req.params;
+
+    const places = await Place.find({
+      "localize.hashtag.enhashtag": { $regex: new RegExp(town, "i") },
+      placeType: placetype,
+    });
+
+    const count = await Place.find({
+      "localize.hashtag.enhashtag": { $regex: new RegExp(town, "i") },
+      placeType: placetype,
+    }).count();
+
+    res.status(200).json({ places, count: count });
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
+export const getHotel = async (req, res) => {
+  try {
+    const { place } = req.params;
+    const data = await Place.find({ placeType: place });
+    res.json(data);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
 
 export const getPlaceByPage = async (req, res) => {
   try {
@@ -60,28 +82,41 @@ export const getPlaceByPage = async (req, res) => {
   }
 };
 
-export const getAllPlaces = async (req, res) => {
-  const page = parseInt(req.query.page);
-  try {
-    const places = await Place.find({})
-      .skip(page * 20)
-      .limit(20);
+// export const getAllPlacesByPage = async (req, res) => {
+//   const page = parseInt(req.query.page);
+//   try {
+//     const places = await Place.find()
+//       .skip(page * 30)
+//       .limit(30);
+//     const totalplaces = await Place.find().count();
+//     res
+//       .status(200)
+//       .json({ places, pagenumber: page, totalplaces: totalplaces });
+//   } catch (error) {
+//     res.status(404).json({ message: error.message });
+//   }
+// };
 
-    res.status(200).json(places);
+export const getAllPlaces = async (req, res) => {
+  try {
+    const places = await Place.find({});
+
+    const totalplaces = await Place.find().count();
+    res.status(200).json({ totalplaces: totalplaces, places });
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
 
-// export const getAllPlacesByLimit = async (req, res) => {
-//   try {
-//     const { limit } = req.params;
-//     const places = await Place.find({}).limit(limit);
-//     res.status(200).json(places);
-//   } catch (error) {
-//     res.status(404).json({ message: error.message });
-//   }
-// };
+export const getAllPlacesByLimit = async (req, res) => {
+  try {
+    const { limit } = req.params;
+    const places = await Place.find({}).limit(limit);
+    res.status(200).json(places);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
 // find places by near location
 
 export const getNearPlaces = async (req, res) => {
@@ -91,7 +126,7 @@ export const getNearPlaces = async (req, res) => {
     const places = await Place.find({
       geolocation: {
         $near: {
-          $maxDistance: 5000,
+          $maxDistance: 20000,
           $minDistance: 1000,
           $geometry: {
             type: "Point",

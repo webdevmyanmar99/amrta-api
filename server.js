@@ -11,7 +11,9 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import placeRoutes from "./routes/places.js";
-import nearRoutes from "./routes/nearRoutes.js";
+import reviewRoutes from "./routes/reviewRoute.js";
+import favoriteRoutes from "./routes/favoriteRoute.js";
+
 import { addPlace } from "./controllers/places.js";
 import { register } from "./controllers/auth.js";
 
@@ -90,9 +92,10 @@ app.use("/users", userRoutes);
 app.use("/place", placeRoutes);
 app.use("/room", roomRoutes);
 app.use("/booking", bookingRoutes);
+app.use("/review", reviewRoutes);
+app.use("/favorite", favoriteRoutes);
 
 // for near place test
-app.use("/near", nearRoutes);
 
 app.use("/image", imageRoutes);
 

@@ -56,9 +56,7 @@ export const addImage = async (req, res) => {
     const saveImage = await newImage.save();
     res.status(201).json(saveImage);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to upload your image.", data: saveImage });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -131,6 +129,16 @@ export const getAllImages = async (req, res) => {
   try {
     const images = await Image.find({});
     res.status(200).json(images);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
+export const getImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const image = await Image.findById(id);
+    res.status(200).json(image);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }

@@ -26,6 +26,8 @@ import roomRoutes from "./routes/room.js";
 import bookingRoutes from "./routes/booking.js";
 // image
 import imageRoutes from "./routes/image.js";
+import townimageRoutes from "./routes/townimage.js";
+
 // configurations
 
 const __filename = fileURLToPath(import.meta.url);
@@ -33,12 +35,12 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 const app = express();
 
-app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
+app.use(express.json());
 app.use(cors());
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 // test vercel
@@ -98,6 +100,7 @@ app.use("/favorite", favoriteRoutes);
 // for near place test
 
 app.use("/image", imageRoutes);
+app.use("/townimage", townimageRoutes);
 
 // show first page
 app.get("*", function (_, res) {

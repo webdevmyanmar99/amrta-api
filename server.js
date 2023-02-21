@@ -27,6 +27,7 @@ import bookingRoutes from "./routes/booking.js";
 // image
 import imageRoutes from "./routes/image.js";
 import townimageRoutes from "./routes/townimage.js";
+import singleimageRoutes from "./routes/singleimageRoute.js";
 
 // configurations
 
@@ -101,6 +102,7 @@ app.use("/favorite", favoriteRoutes);
 
 app.use("/image", imageRoutes);
 app.use("/townimage", townimageRoutes);
+app.use("/singleimage", singleimageRoutes);
 
 // show first page
 app.get("*", function (_, res) {

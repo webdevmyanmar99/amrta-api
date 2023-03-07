@@ -9,9 +9,12 @@ import {
   getAllPlacesByLimit,
   getPlaceByPage,
   getNearPlacesByType,
-  updateSingleImage,
+  // updateSingleImage,
   getPlaceByTown,
   getPlaceByTownByplaceType,
+  addImageByOwner,
+  deleteImageByOwner,
+  updateImageByOwner,
   //getAllPlacesByPage,
 } from "../controllers/places.js";
 
@@ -36,6 +39,9 @@ router.get(
 );
 
 //singleimage
-router.patch("/updateSingleImage/:id", updateSingleImage);
+// router.patch("/updateSingleImage/:id", updateSingleImage);
+router.post("/addimagebyowner/:placeId", addImageByOwner);
+router.delete("/deleteimagebyowner/:placeId/:imageId", deleteImageByOwner);
+router.patch("/updateimagebyowner/:placeId/:imageId", updateImageByOwner);
 
 export default router;

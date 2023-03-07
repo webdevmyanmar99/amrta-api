@@ -1,6 +1,6 @@
 import Place from "../models/Place.js";
 import dotenv from "dotenv";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 import { fileTypeFromBuffer } from "file-type";
 dotenv.config();
@@ -25,8 +25,8 @@ export const getPlaceByTown = async (req, res) => {
     const places = await Place.find(
       {
         "localize.hashtag.enhashtag": { $regex: new RegExp(town, "i") },
-      },
-      { "localize.address.town": 1, _id: 0 }
+      }
+      // { "localize.address.town": 1, _id: 0 }
     );
 
     const count = await Place.find({
@@ -201,93 +201,93 @@ export const addPlace = async (req, res) => {
       VerifiedData,
     } = req.body;
 
-    if (!images) {
-      return (images = []);
-    } else {
-      await Promise.all(
-        images.map(async (image) => {
-          let pathimagesBuffer = new Buffer.from(image.pathimages, "base64");
+    // if (!images) {
+    //   return (images = []);
+    // } else {
+    await Promise.all(
+      images.map(async (image) => {
+        let pathimagesBuffer = new Buffer.from(image.pathimages, "base64");
 
-          let sharpImage = await sharp(pathimagesBuffer)
-            .resize({
-              height: 1920,
-              width: 1080,
-              fit: "contain",
-            })
-            .toBuffer();
+        let sharpImage = await sharp(pathimagesBuffer)
+          .resize({
+            height: 1920,
+            width: 1080,
+            fit: "contain",
+          })
+          .toBuffer();
 
-          let fileType = await fileTypeFromBuffer(sharpImage);
+        let fileType = await fileTypeFromBuffer(sharpImage);
 
-          let mimeType = fileType.mime;
-          let extType = fileType.ext;
+        let mimeType = fileType.mime;
+        let extType = fileType.ext;
 
-          let imageName = `${Date.now()}.${extType}`;
+        let imageName = `${Date.now()}.${extType}`;
 
-          const uploadParams = {
-            Bucket: "amrtago",
-            Body: sharpImage,
-            Key: imageName,
-            ContentType: mimeType,
-            ContentEncoding: "base64",
-            ACL: "public-read",
-          };
+        const uploadParams = {
+          Bucket: "amrtago",
+          Body: sharpImage,
+          Key: imageName,
+          ContentType: mimeType,
+          ContentEncoding: "base64",
+          ACL: "public-read",
+        };
 
-          const run = async () => {
-            try {
-              await s3Client.send(new PutObjectCommand(uploadParams));
-            } catch (error) {
-              console.log("error", error);
-            }
-          };
-          run();
-          image.pathimages = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
-        })
-      );
-    }
+        const run = async () => {
+          try {
+            await s3Client.send(new PutObjectCommand(uploadParams));
+          } catch (error) {
+            console.log("error", error);
+          }
+        };
+        run();
+        image.pathimages = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
+      })
+    );
+    // }
 
-    if (!singleimage) {
-      return (singleimage = []);
-    } else {
-      await Promise.all(
-        singleimage.map(async (simage) => {
-          let singleimageBuffer = new Buffer.from(simage, "base64");
+    // if (!singleimage) {
+    //   return (singleimage = []);
+    // } else {
+    //   await Promise.all(
+    //     singleimage.map(async (simage) => {
+    //       let singleimageBuffer = new Buffer.from(simage, "base64");
 
-          let ssharpImage = await sharp(singleimageBuffer)
-            .resize({
-              height: 1920,
-              width: 1080,
-              fit: "contain",
-            })
-            .toBuffer();
+    //       let ssharpImage = await sharp(singleimageBuffer)
+    //         .resize({
+    //           height: 1920,
+    //           width: 1080,
+    //           fit: "contain",
+    //         })
+    //         .toBuffer();
 
-          let fileType = await fileTypeFromBuffer(ssharpImage);
+    //       let fileType = await fileTypeFromBuffer(ssharpImage);
 
-          let mimeType = fileType.mime;
-          let extType = fileType.ext;
+    //       let mimeType = fileType.mime;
+    //       let extType = fileType.ext;
 
-          let imageName = `${Date.now()}-single.${extType}`;
+    //       let imageName = `${Date.now()}-single.${extType}`;
 
-          const uploadParams = {
-            Bucket: "amrtago",
-            Body: ssharpImage,
-            Key: imageName,
-            ContentType: mimeType,
-            ContentEncoding: "base64",
-            ACL: "public-read",
-          };
+    //       const uploadParams = {
+    //         Bucket: "amrtago",
+    //         Body: ssharpImage,
+    //         Key: imageName,
+    //         ContentType: mimeType,
+    //         ContentEncoding: "base64",
+    //         ACL: "public-read",
+    //       };
 
-          const run = async () => {
-            try {
-              await s3Client.send(new PutObjectCommand(uploadParams));
-            } catch (error) {
-              console.log("error", error);
-            }
-          };
-          run();
-          singleimage = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
-        })
-      );
-    }
+    //       const run = async () => {
+    //         try {
+    //           await s3Client.send(new PutObjectCommand(uploadParams));
+    //         } catch (error) {
+    //           console.log("error", error);
+    //         }
+    //       };
+    //       run();
+    //       singleimage = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
+    //     })
+    //   );
+    // }
 
     var newPlace = new Place({
       _id,
@@ -310,7 +310,7 @@ export const addPlace = async (req, res) => {
       festival,
       hospital,
       images: images,
-      singleimage: singleimage,
+      // singleimage: singleimage,
       contactnum,
       VerifiedData,
     });
@@ -345,64 +345,263 @@ export const deletePlace = async (req, res) => {
   }
 };
 
-export const updateSingleImage = async (req, res) => {
+// export const updateSingleImage = async (req, res) => {
+//   try {
+//     let { singleimage } = req.body;
+
+//     if (!singleimage) {
+//       return (singleimage = []);
+//     } else {
+//       await Promise.all(
+//         singleimage.map(async (simage) => {
+//           let ssingleimageBuffer = new Buffer.from(simage, "base64");
+
+//           let fileType = await fileTypeFromBuffer(ssingleimageBuffer);
+
+//           let mimeType = fileType.mime;
+//           let extType = fileType.ext;
+
+//           let imageName = `${Date.now()}-single.${extType}`;
+
+//           const uploadParams = {
+//             Bucket: "amrtago",
+//             Body: ssingleimageBuffer,
+//             Key: imageName,
+//             ContentType: mimeType,
+//             ContentEncoding: "base64",
+//             ACL: "public-read",
+//           };
+
+//           const run = async () => {
+//             try {
+//               await s3Client.send(new PutObjectCommand(uploadParams));
+//             } catch (error) {
+//               console.log("error", error);
+//             }
+//           };
+//           run();
+//           singleimage = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
+//           console.log(singleimage);
+//         })
+//       );
+//     }
+//     req.body.singleimage = singleimage;
+//     let updatedSingleImage = await Place.findByIdAndUpdate(
+//       req.params.id,
+//       req.body,
+//       // `"singleimage": ["${singleimage}"]`,
+//       {
+//         new: true,
+//       }
+//     );
+//     res.status(200).json(updatedSingleImage);
+//   } catch (error) {
+//     res.status(400).json({ message: error.message });
+//   }
+// };
+
+// hotel staff manage their images
+
+export const addImageByOwner = async (req, res) => {
   try {
-    let { singleimage } = req.body;
+    var { images } = req.body;
 
-    if (!singleimage) {
-      return (singleimage = []);
-    } else {
-      await Promise.all(
-        singleimage.map(async (simage) => {
-          let ssingleimageBuffer = new Buffer.from(simage, "base64");
+    let { placeId } = req.params;
 
-          // let ssharpImage = await sharp(ssingleimageBuffer).resize({
-          //   height: 1920,
-          //   width: 1080,
-          //   fit: "contain",
-          // });
-          // .toBuffer()
+    const place = await Place.findById(placeId);
 
-          let fileType = await fileTypeFromBuffer(ssingleimageBuffer);
-
-          let mimeType = fileType.mime;
-          let extType = fileType.ext;
-
-          let imageName = `${Date.now()}-single.${extType}`;
-
-          const uploadParams = {
-            Bucket: "amrtago",
-            Body: ssingleimageBuffer,
-            Key: imageName,
-            ContentType: mimeType,
-            ContentEncoding: "base64",
-            ACL: "public-read",
-          };
-
-          const run = async () => {
-            try {
-              await s3Client.send(new PutObjectCommand(uploadParams));
-            } catch (error) {
-              console.log("error", error);
-            }
-          };
-          run();
-          singleimage = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
-          console.log(singleimage);
-        })
-      );
+    if (!place) {
+      return res.status(404).json({ message: "place not found" });
     }
-    req.body.singleimage = singleimage;
-    let updatedSingleImage = await Place.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      // `"singleimage": ["${singleimage}"]`,
-      {
-        new: true,
-      }
+
+    await Promise.all(
+      images.map(async (image) => {
+        let pathimagesBuffer = new Buffer.from(image.pathimages, "base64");
+
+        let fileType = await fileTypeFromBuffer(pathimagesBuffer);
+
+        let mimeType = fileType.mime;
+        let extType = fileType.ext;
+
+        let imageName = `${Date.now()}.${extType}`;
+
+        const uploadParams = {
+          Bucket: "amrtago",
+          Body: pathimagesBuffer,
+          Key: imageName,
+          ContentType: mimeType,
+          ContentEncoding: "base64",
+          ACL: "public-read",
+        };
+
+        const run = async () => {
+          try {
+            await s3Client.send(new PutObjectCommand(uploadParams)).promise();
+          } catch (error) {
+            console.log("error", error);
+          }
+        };
+        run();
+        image.pathimages = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
+      })
     );
-    res.status(200).json(updatedSingleImage);
+
+    await place.update({ $push: { images: images } });
+
+    await place.save();
+
+    res.status(201).json({
+      message: "Image added successfully",
+      images,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateImageByOwner = async (req, res) => {
+  try {
+    let { image } = req.body;
+    let { placeId, imageId } = req.params;
+
+    const place = await Place.findById(placeId);
+
+    if (!place) {
+      return res.status(404).json({ message: "place not found" });
+    }
+
+    const imageIndex = place.images.findIndex(
+      (i) => i._id.toString() === imageId
+    );
+
+    if (imageIndex === -1) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+
+    if (!image) {
+      return (image = "");
+    } else {
+      let imageBuffer = new Buffer.from(image, "base64");
+
+      let fileType = await fileTypeFromBuffer(imageBuffer);
+
+      let mimeType = fileType.mime;
+      let extType = fileType.ext;
+
+      let imageName = `${Date.now()}.${extType}`;
+
+      const uploadParams = {
+        Bucket: "amrtago",
+        Body: imageBuffer,
+        Key: imageName,
+        ContentType: mimeType,
+        ContentEncoding: "base64",
+        ACL: "public-read",
+      };
+
+      const run = async () => {
+        try {
+          await s3Client.send(new PutObjectCommand(uploadParams)).promise();
+        } catch (error) {
+          console.log("error", error);
+        }
+      };
+      run();
+      image = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
+    }
+
+    place.images[imageIndex].pathimages = image;
+    await place.save();
+
+    res.status(200).json({ message: "Image updated successfully", image });
+    // if (!images) {
+    //   return (images = []);
+    // } else {
+    // await Promise.all(
+    //   images.map(async (image) => {
+    //     let pathimagesBuffer = new Buffer.from(image.pathimages, "base64");
+
+    //     let fileType = await fileTypeFromBuffer(pathimagesBuffer);
+
+    //     let mimeType = fileType.mime;
+    //     let extType = fileType.ext;
+
+    //     let imageName = `${Date.now()}.${extType}`;
+
+    //     const uploadParams = {
+    //       Bucket: "amrtago",
+    //       Body: pathimagesBuffer,
+    //       Key: imageName,
+    //       ContentType: mimeType,
+    //       ContentEncoding: "base64",
+    //       ACL: "public-read",
+    //     };
+
+    //     const run = async () => {
+    //       try {
+    //         await s3Client.send(new PutObjectCommand(uploadParams));
+    //       } catch (error) {
+    //         console.log("error", error);
+    //       }
+    //     };
+    //     run();
+    //     image.pathimages = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
+    //   })
+    // );
+    // }
+    // req.body.images = images;
+    // let updatedImages = await Place.findByIdAndUpdate(
+    //   req.params.id,
+    //   req.body,
+
+    //   {
+    //     new: true,
+    //   }
+    // );
+    // res.status(200).json(updatedImages);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+export const deleteImageByOwner = async (req, res) => {
+  const { placeId, imageId } = req.params;
+
+  try {
+    const place = await Place.findById(placeId);
+
+    if (!place) {
+      return res.status(404).json({ message: "Hotel not found" });
+    }
+
+    const image = place.images.find((img) => img._id == imageId);
+
+    if (!image) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+
+    var imageName = image.pathimages;
+    imageName = imageName.replace(
+      "https://amrtago.sgp1.digitaloceanspaces.com/",
+      ""
+    );
+
+    const params = {
+      Bucket: "amrtago",
+      Key: imageName,
+    };
+
+    const run = async () => {
+      await s3Client.send(new DeleteObjectCommand(params));
+    };
+    run();
+
+    await place.updateOne({ $pull: { images: { _id: imageId } } });
+
+    res
+      .status(200)
+      .json({ message: "Hotel image deleted successfully", imageName });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
   }
 };

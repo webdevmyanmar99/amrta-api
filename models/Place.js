@@ -31,7 +31,7 @@ const PlaceSchema = new mongoose.Schema({
     type: {
       type: String,
       enum: ["Point"],
-      default: "Point",
+      // default: "Point",
     },
     coordinates: {
       type: [Number],
@@ -58,7 +58,7 @@ const PlaceSchema = new mongoose.Schema({
       description: String,
     },
   ],
-  singleimage: [String],
+  // singleimage: [String],
   contactnum: [String],
   VerifiedData: String,
 });

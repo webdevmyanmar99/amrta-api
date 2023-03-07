@@ -1,4 +1,5 @@
 import Review from "../models/reviewSchema.js";
+import Place from "../models/Place.js";
 
 export const getRating = async (req, res) => {
   try {
@@ -49,7 +50,19 @@ export const createReview = async (req, res) => {
   try {
     const { place, user, comment, rating } = req.body;
     const newReview = new Review({ place, user, comment, rating });
+
     const savedReview = await newReview.save();
+
+    const ratings = await Review.find({ place: place });
+    const totalRating = ratings.reduce((sum, rating) => sum + rating.rating, 0);
+    const averageRating = totalRating / ratings.length;
+    await Place.findByIdAndUpdate(place, {
+      rating: averageRating,
+    });
+
+    // await Place.findByIdAndUpdate(place, {
+    //   $push: { rating: savedReview.rating },
+    // });
     res.status(201).json({ savedReview });
   } catch (error) {
     res.status(400).json({

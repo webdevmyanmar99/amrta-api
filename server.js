@@ -105,12 +105,16 @@ app.use("/townimage", townimageRoutes);
 app.use("/singleimage", singleimageRoutes);
 
 // show first page
+
+app.use(express.static("pages/api"));
+
 app.get("*", function (_, res) {
   res.sendFile(path.join(__dirname, "/pages/api/index.html"), function (err) {
     res.status(500).send(err);
   });
 });
 
+// /pages/api/index.html
 // mongoose setup
 const PORT = process.env.PORT || 3020;
 mongoose.set("strictQuery", false);

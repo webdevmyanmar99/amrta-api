@@ -41,7 +41,6 @@ export const addImage = async (req, res) => {
       };
       run();
       image = `https://amrtago.sgp1.digitaloceanspaces.com/${imageName}`;
-      console.log(image);
     }
 
     var newImage = new Singleimage({
@@ -64,7 +63,7 @@ export const deleteImage = async (req, res) => {
       "https://amrtago.sgp1.digitaloceanspaces.com/",
       ""
     );
-    console.log(imageName);
+
     const params = {
       Bucket: "amrtago",
       Key: imageName,
@@ -109,7 +108,7 @@ export const updateImage = async (req, res) => {
 
       const run = async () => {
         try {
-          await s3Client.send(new PutObjectCommand(uploadParams)).promise();
+          await s3Client.send(new PutObjectCommand(uploadParams));
         } catch (error) {
           console.log("error", error);
         }

@@ -6,7 +6,7 @@ import {
   getAllImages,
   updateImage,
   getImage,
-} from "../controllers/singleimageController.js";
+} from "../controllers/singleImageController.js";
 
 const router = express.Router();
 router.post("/", addImage);

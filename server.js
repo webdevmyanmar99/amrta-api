@@ -106,12 +106,15 @@ app.use("/singleimage", singleimageRoutes);
 
 // show first page
 
-app.use(express.static("pages/api"));
+app.use(express.static("amrta-react/build"));
 
 app.get("*", function (_, res) {
-  res.sendFile(path.join(__dirname, "/pages/api/index.html"), function (err) {
-    res.status(500).send(err);
-  });
+  res.sendFile(
+    path.join(__dirname, "/amrta-react/build/index.html"),
+    function (err) {
+      res.status(500).send(err);
+    }
+  );
 });
 
 // /pages/api/index.html
